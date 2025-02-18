@@ -1,7 +1,7 @@
-# Precio Elec App
+# PWPC Flutter App
 
 ## Descripción
-pwpc-flutter es una aplicación desarrollada en Flutter que permite a los usuarios consultar los precios de la electricidad.
+pwpc-flutter-app es una aplicación desarrollada en Flutter que permite a los usuarios consultar los precios de la electricidad.
 
 ## Captura de Pantalla
 ![Captura de Pantalla](flutter.png)
