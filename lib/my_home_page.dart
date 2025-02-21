@@ -45,6 +45,10 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+ Future<void> _refresh() async {
+    _loadCache();
+  }
+
   @override
   Widget build(BuildContext context) {
     final filteredPreUsage = filterDataPreUsage(_jsonData, _selectedUso); // Filtra los datos según la hora de uso seleccionado
@@ -56,96 +60,105 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            const SizedBox(height: 20),
-            Card(
-              elevation: 4.0,
-              margin: const EdgeInsets.all(10.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Text(
-                      ' $_date \n A que hora me cuesta menos cargar mis baterías:\n',
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  ...buildDropdowns(_selectedUso, _selectedTarda, (uso, tarda) {
-                    setState(() {
-                      _selectedUso = uso;
-                      _selectedTarda = tarda; // Actualiza los valores seleccionados
-                    });
-                  }),
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.all(10.0),
-                    child: Card(
-                      elevation: 4.0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Column(
-                          children: [
-                            Text('Las mejores horas del día son:'),
-                            ...filteredNCheapest.map((item) {
-                              return Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Text(item), // Muestra las horas más económicas
-                              );
-                            }),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _jsonData.split('\n').length,
-              itemBuilder: (context, index) {
-                final item = _jsonData.split('\n')[index];
-                final priceString = item.split(' ')[0];
-                final price =
-                    double.tryParse(priceString.replaceAll('€/kWh,', '')) ??
-                    0.0;
-                Color cardColor;
-                if (price < 0.10) {
-                  cardColor = Colors.green[100]!;
-                } else if (price >= 0.10 && price < 0.15) {
-                  cardColor = Colors.yellow[100]!;
-                } else {
-                  cardColor = Colors.red[100]!;
-                }
-                return Card(
-                  color: cardColor,
-                  elevation: 4.0,
-                  margin: const EdgeInsets.all(10.0),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        item,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+        title: Row(
+          children: [
+            Image.asset('icons/Icon-192.png', width: 24, height: 24),
+            SizedBox(width: 4), // Agrega un espacio pequeño entre la imagen y el título
+            Text(widget.title),
           ],
         ),
       ),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+          child: SingleChildScrollView(
+            child: Column(
+            children: <Widget>[
+              const SizedBox(height: 20),
+              Card(
+                elevation: 4.0,
+                margin: const EdgeInsets.all(10.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text(
+                        ' $_date \n A que hora me cuesta menos cargar mis baterías:\n',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    ...buildDropdowns(_selectedUso, _selectedTarda, (uso, tarda) {
+                      setState(() {
+                        _selectedUso = uso;
+                        _selectedTarda = tarda; // Actualiza los valores seleccionados
+                      });
+                    }),
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.all(10.0),
+                      child: Card(
+                        elevation: 4.0,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            children: [
+                              Text('Las mejores horas del día son:'),
+                              ...filteredNCheapest.map((item) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Text(item), // Muestra las horas más económicas
+                                );
+                              }),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _jsonData.split('\n').length,
+                itemBuilder: (context, index) {
+                  final item = _jsonData.split('\n')[index];
+                  final priceString = item.split(' ')[0];
+                  final price =
+                      double.tryParse(priceString.replaceAll('€/kWh,', '')) ??
+                      0.0;
+                  Color cardColor;
+                  if (price < 0.10) {
+                    cardColor = Colors.green[100]!;
+                  } else if (price >= 0.10 && price < 0.15) {
+                    cardColor = Colors.yellow[100]!;
+                  } else {
+                    cardColor = Colors.red[100]!;
+                  }
+                  return Card(
+                    color: cardColor,
+                    elevation: 4.0,
+                    margin: const EdgeInsets.all(10.0),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text(
+                          item,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      )
     );
   }
 }
